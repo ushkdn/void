@@ -1,0 +1,78 @@
+services:
+ 
+    auth.db:
+        image: postgres:17
+        container_name: auth.db
+        ports:
+            - ${AUTH_DB_PORTS}
+        environment:
+            POSTGRES_DB: ${AUTH_DB_DATABASE}
+            POSTGRES_USER: ${AUTH_DB_USER}
+            POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+        volumes:
+            - auth.db.data:/var/lib/postgresql/data
+
+    user.db:
+        image: postgres:17
+        container_name: user.db
+        ports:
+            - ${USER_DB_PORTS}
+        environment:
+            POSTGRES_DB: ${USER_DB_DATABASE}
+            POSTGRES_USER: ${USER_DB_USER}
+            POSTGRES_PASSWORD: ${USER_DB_PASSWORD}
+        volumes:
+            - user.db.data:/var/lib/postgresql/data\
+
+    logs.db:
+        image: postgres:17
+        container_name: logs.db
+        ports:
+            - ${LOGS_DB_PORTS}
+        environment:
+            POSTGRES_DB: ${LOGS_DB_DATABASE}
+            POSTGRES_USER: ${LOGS_DB_USER}
+            POSTGRES_PASSWORD: ${LOGS_DB_PASSWORD}
+        volumes:
+            - logs.db.data:/var/lib/postgresql/data
+
+    pgadmin:
+        image: dpage/pgadmin4:9.0.0
+        container_name: pgadmin
+        environment:
+            PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+            PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+        ports:
+            - ${PGADMIN_PORTS}
+        volumes:
+            - pgadmin.data:/var/lib/pgadmin/data
+        depends_on:
+            - user.db
+            - auth.db
+    
+    redis:
+        image: redis:8-alpine
+        container_name: redis
+        ports:
+            - ${REDIS_PORTS}
+        volumes:
+            - redis.data:/var/lib/redis/data
+        depends_on:
+            - auth.db
+            - user.db
+    
+    seq:
+        image: datalust/seq:2025
+        container_name: seq
+        environment:
+            - ACCEPT_EULA=Y
+        ports:
+            - ${SEQ_SERVER_PORTS}
+            - ${SEQ_DASHBOARD_PORTS}
+        
+volumes:
+    user.db.data:
+    auth.db.data:
+    logs.db.data:
+    pgadmin.data:
+    redis.data:
